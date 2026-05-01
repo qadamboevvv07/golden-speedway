@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GOLDEN RACE PRO | QADAMBOYEV</title>
+    <style>
+        :root { --gold: #FFD700; --black: #050505; --neon: 0 0 20px rgba(255, 215, 0, 0.5); }
+        body {
+            background-color: var(--black); color: white; font-family: 'Orbitron', sans-serif;
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0;
+        }
+
+        .wrapper { width: 95%; max-width: 1000px; padding: 20px; text-align: center; }
+
+        #setup-screen, .game-container {
+            background: rgba(15, 15, 15, 0.95); border: 2px solid var(--gold);
+            border-radius: 20px; padding: 35px; box-shadow: var(--neon); margin-top: 30px;
+        }
+
+        .track-container {
+            width: 100%; height: 120px; position: relative; display: none; margin: 30px 0;
+            background: linear-gradient(transparent 48%, #333 48%, #333 52%, transparent 52%);
+            border-bottom: 3px solid var(--gold); overflow: hidden;
+        }
+
+        #car {
+            position: absolute; bottom: 15px; left: 0; width: 110px;
+            transition: left 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67); z-index: 5;
+        }
+
+        #obstacle { position: absolute; right: 10px; bottom: 15px; font-size: 50px; display: none; }
+
+        .text-to-type {
+            font-size: 1.6rem; margin-bottom: 25px; color: var(--gold);
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.4); line-height: 1.7;
+            min-height: 120px;
+        }
+        .correct { color: white; text-shadow: none; }
+        .wrong { color: #ff3333; text-decoration: underline; background: rgba(255,0,0,0.15); }
+
+        input {
+            width: 95%; padding: 20px; background: #000; border: 2px solid #444;
+            color: white; font-size: 1.3rem; border-radius: 12px; outline: none; text-align: center;
+        }
+        input:focus { border-color: var(--gold); box-shadow: var(--neon); }
+
+        .stats { margin-top: 25px; display: flex; justify-content: space-around; color: var(--gold); font-size: 1.3rem; font-weight: bold; }
+
+        .btn {
+            padding: 15px 35px; border: 1px solid var(--gold); background: var(--gold);
+            color: black; font-weight: bold; border-radius: 10px; cursor: pointer; font-size: 1.1rem;
+            transition: 0.3s; margin: 10px;
+        }
+        .btn:hover { transform: scale(1.05); box-shadow: var(--neon); }
+        .btn-outline { background: transparent; color: var(--gold); }
+
+        .footer { margin-top: auto; padding: 30px; width: 100%; border-top: 1px solid var(--gold); text-align: center; background: #0a0a0a; }
+        .footer a { color: var(--gold); text-decoration: none; margin: 0 15px; font-size: 0.95rem; transition: 0.3s; }
+    </style>
+</head>
+<body>
+
+    <div class="wrapper">
+        <div id="setup-screen">
+            <h1 style="color: var(--gold); letter-spacing: 5px; text-shadow: var(--neon);">GOLDEN SPEEDWAY</h1>
+            <select id="lang-select" class="btn btn-outline">
+                <option value="uz">O'ZBEK</option>
+                <option value="ru">РУССКИЙ</option>
+                <option value="en">ENGLISH</option>
+                <option value="kaa">QARAQALPAQ</option>
+            </select>
+            <select id="level-select" class="btn btn-outline">
+                <option value="easy">EASY (30 WPM)</option>
+                <option value="medium">MEDIUM (50 WPM)</option>
+                <option value="hard">HARD (75 WPM)</option>
+            </select>
+            <br>
+            <button class="btn" onclick="initGame()">POYGANI BOSHLASH</button>
+        </div>
+
+        <div class="track-container" id="track">
+            <div id="car">
+                <svg viewBox="0 0 120 50" fill="var(--gold)">
+                    <path d="M100 40 L115 40 L115 30 L105 25 L80 25 L70 15 L30 15 L20 25 L5 25 L5 40 L20 40" stroke="black" stroke-width="2"/>
+                    <rect x="35" y="10" width="30" height="8" fill="#555"/>
+                    <circle cx="25" cy="40" r="8" fill="#111" stroke="var(--gold)" stroke-width="2"/>
+                    <circle cx="90" cy="40" r="8" fill="#111" stroke="var(--gold)" stroke-width="2"/>
+                    <path d="M70 15 L85 25 L70 25 Z" fill="rgba(255,255,255,0.6)"/>
+                    <rect x="95" y="30" width="15" height="5" fill="red"/>
+                </svg>
+            </div>
+            <div id="obstacle">🪨</div>
+        </div>
+
+        <div class="game-container" id="game" style="display:none">
+            <div class="text-to-type" id="text-display"></div>
+            <input type="text" id="input-field" placeholder="Tezroq yozing..." autocomplete="off">
+            <div class="stats">
+                <div>TEZLIK: <span id="wpm">0</span> WPM</div>
+                <div>XATO: <span id="errors">0</span></div>
+                <div>VAQT: <span id="time">0</span>s</div>
+            </div>
+            <h2 id="result-msg" style="margin-top:20px;"></h2>
+            <button id="retry-btn" class="btn" style="display:none" onclick="location.reload()">QAYTA URINISH</button>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <strong style="color: var(--gold); font-size: 1.2rem;">AMIRBEK QADAMBOYEV</strong><br><br>
+        <a href="tel:+998948460914">📞 +998 94 846 09 14</a>
+        <a href="https://t.me/qadamboyevvv_07" target="_blank">✈️ Telegram</a>
+    </footer>
+
+    <script>
+        const texts = {
+            uz: { easy: "O'zbekiston - go'zal yurt, uning tabiati va mehmondo'st xalqi barchani hayratga soladi.", medium: "Vatanimiz mustaqilligi biz uchun eng oliy saodatdir, uni asrab-avaylash har birimizning burchimizdir.", hard: "Ilm-fan va innovatsiyalar bugungi kunning asosiy drayveri bo'lib, yoshlarimiz bu yo'lda eng ilg'or kadrlardir." },
+            en: { easy: "The golden sun rises every morning, bringing new light and hope to the entire world.", medium: "Success is not a destination, but a journey of constant learning and overcoming difficult challenges.", hard: "Artificial intelligence is a branch of computer science that aims to create smart machines capable of learning." },
+            ru: { easy: "Сегодня прекрасный солнечный день, который идеально подходит для долгой прогулки на свежем воздухе.", medium: "Программирование требует не только логического мышления, но и огромного терпения для решения сложных задач.", hard: "Великие достижения человечества всегда начинались с маленькой мечты и непоколебимой веры в собственный успех." },
+            kaa: { easy: "Qaraqalpaqstan - mende tuwılǵan kishi watanım, onıń keleshegi ushın xızmet etiw - menıń maqsetim.", medium: "Jaslar - biziń keleshegimiz hám xalqımızdıń maqtanıshı, olar hár dayım alǵa umtılıwı kerek.", hard: "Berdaq babamızdıń miyrasları qaraqalpaq ádebiyatınıń eń baha jetpes baylıǵı bolıp esaplanadı." }
+        };
+
+        let targetText = "";
+        let startTime, timer, isStarted = false;
+
+        function initGame() {
+            const lang = document.getElementById('lang-select').value;
+            const lvl = document.getElementById('level-select').value;
+            targetText = texts[lang][lvl];
+            document.getElementById('setup-screen').style.display = 'none';
+            document.getElementById('track').style.display = 'block';
+            document.getElementById('game').style.display = 'block';
+            document.getElementById('text-display').innerHTML = targetText.split('').map(c => `<span>${c}</span>`).join('');
+            document.getElementById('input-field').focus();
+        }
+
+        document.getElementById('input-field').addEventListener('input', e => {
+            if(!isStarted) { startTime = new Date(); timer = setInterval(updateStats, 1000); isStarted = true; }
+            const spans = document.querySelectorAll('#text-display span');
+            const val = e.target.value.split('');
+            let errors = 0;
+            spans.forEach((s, i) => {
+                if (val[i] == null) s.className = '';
+                else if (val[i] === s.innerText) s.className = 'correct';
+                else { s.className = 'wrong'; errors++; }
+            });
+
+            let progress = (val.length / targetText.length) * 92;
+            document.getElementById('car').style.left = progress + '%';
+            document.getElementById('errors').innerText = errors;
+            if(val.length >= targetText.length) finish();
+        });
+
+        function updateStats() {
+            const elapsed = (new Date() - startTime) / 1000;
+            document.getElementById('time').innerText = Math.floor(elapsed);
+            const wordCount = document.getElementById('input-field').value.trim().split(/\s+/).length;
+            const wpm = Math.round((wordCount / elapsed) * 60);
+            document.getElementById('wpm').innerText = isNaN(wpm) ? 0 : wpm;
+        }
+
+        function finish() {
+            clearInterval(timer);
+            const wpm = parseInt(document.getElementById('wpm').innerText);
+            const lvl = document.getElementById('level-select').value;
+            const res = document.getElementById('result-msg');
+            const car = document.getElementById('car');
+            document.getElementById('retry-btn').style.display = 'inline-block';
+            document.getElementById('input-field').disabled = true;
+            let limit = (lvl === 'easy') ? 30 : (lvl === 'medium' ? 50 : 75);
+
+            if(wpm < limit) {
+                document.getElementById('obstacle').style.display = 'block';
+                car.style.transform = 'rotate(15deg)'; // Crash holati (o'ngga qarab)
+                res.innerText = "🚨 CRASH! TEZLIK YETARLI EMAS!";
+                res.style.color = "#ff3333";
+            } else {
+                car.style.left = '110%'; // O'ngdan chiqib ketadi
+                res.innerText = "🏆 LEGENDARY! SIZ HAQIQIY POYGACHISIZ!";
+                res.style.color = "var(--gold)";
+            }
+        }
+    </script>
+</body>
+</html>
